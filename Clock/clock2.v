@@ -1,8 +1,5 @@
 `timescale 1s / 1ms
 
-// ─────────────────────────────────────────────────────────────────
-// 1) Timekeeper as a four‐state FSM, with date range Jan-2020 → Apr-2025
-// ─────────────────────────────────────────────────────────────────
 module timekeeper(
     input             clk,
     input             reset,
@@ -231,9 +228,7 @@ module timekeeper(
 
 endmodule
 
-// ─────────────────────────────────────────────────────────────────
-// 2) Timer
-// ─────────────────────────────────────────────────────────────────
+
 module timer_module(
     input         clk,
     input         reset,
@@ -264,9 +259,7 @@ module timer_module(
 endmodule
 
 
-// ─────────────────────────────────────────────────────────────────
-// 3) Alarm
-// ─────────────────────────────────────────────────────────────────
+
 module alarm_module(
     input         clk,
     input         reset,
@@ -298,9 +291,6 @@ module alarm_module(
 endmodule
 
 
-// ─────────────────────────────────────────────────────────────────
-// 4) Combine into digital_clock
-// ─────────────────────────────────────────────────────────────────
 module digital_clock(
     input         clk,
     input         reset,
@@ -337,9 +327,7 @@ module digital_clock(
 endmodule
 
 
-// ─────────────────────────────────────────────────────────────────
-// 5) Top‐level with MODE FSM (IDLE → SET_TIMER → SET_ALARM → IDLE)
-// ─────────────────────────────────────────────────────────────────
+
 module clock_with_mode_fsm(
     input        clk,
     input        reset,
