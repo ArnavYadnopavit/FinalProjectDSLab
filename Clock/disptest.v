@@ -25,10 +25,10 @@ module test;
     .timer_min_left(timer_min_left),
     .timer_sec_left(timer_sec_left)
   );
-
+integer i;
   initial begin
     // dump waves
-    $dumpfile("test.vcd");
+    $dumpfile("disptest.vcd");
     $dumpvars(0,test);
 
     // initialize
@@ -40,26 +40,31 @@ module test;
     add_minute     = 0;
     set_timer_btn  = 0;
     set_alarm_btn  = 0;
-    #2 reset = 0;
+    #1 reset = 0;
 
-    // 1) Enter SET_TIMER, bump minutes, confirm
-    #5 mode_btn = 1; #1 mode_btn = 0;
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 minute
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 more
-    #5 set_timer_btn = 1; #1 set_timer_btn = 0;
-
-    // 2) Enter SET_ALARM, bump hr & min, confirm
-    #10 mode_btn = 1; #1 mode_btn = 0;
-    #5 add_hour   = 1; #1 add_hour   = 0;  // +1 hour
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 minute
-    #5 set_alarm_btn = 1; #1 set_alarm_btn = 0;
-
-    // 3) Back to IDLE, let clock & timer run
-    #10 mode_btn = 1; #1 mode_btn = 0;
-
-    // run for ~70 seconds to see timer and maybe alarm
-    #3661;
-
+    for (i = 0; i < 22; i = i + 1) begin
+    #1 add_hour = 1; 
+    #1 add_hour = 0;  // +1 hour
+    #1 add_minute = 1; 
+    #1 add_minute = 0;  // +1 minute
+  end
+  for (i = 0; i < 35; i = i + 1) begin
+    #1 add_minute = 1; 
+    #1 add_minute = 0;  // +1 minute
+  end
+  #23;
+  AM_mode=0;
+  for (i = 0; i < 25; i = i + 1) begin
+    #1 add_hour = 1; 
+    #1 add_hour = 0;  // +1 hour
+    #1 add_minute = 1; 
+    #1 add_minute = 0;  // +1 minute
+  end
+  for (i = 0; i < 35; i = i + 1) begin
+    #1 add_minute = 1; 
+    #1 add_minute = 0;  // +1 minute
+  end
+  #23;
     $finish;
   end
 
@@ -68,9 +73,9 @@ module test;
 
   // display
   always @(posedge clk) begin
-    $display("MODE=%0d | %02d:%02d:%02d %s | %02d/%02d/%04d | Tleft=%02d:%02d Bz=%b | Albz=%b",
+    $display("AM_MODE=%b |MODE=%0d | %02d:%02d:%02d %s | %02d/%02d/%04d | Tleft=%02d:%02d Bz=%b | Albz=%b",AM_mode,
       uut.state,
-      hr, min, sec, AM_PM?"PM":"AM",
+      hr, min, sec, AM_mode?(AM_PM ? "PM" : "AM"):"HOURS",
       day, month, year,
       timer_min_left, timer_sec_left, timer_buzzer,
       alarm_buzzer

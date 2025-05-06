@@ -25,11 +25,11 @@ module test;
     .timer_min_left(timer_min_left),
     .timer_sec_left(timer_sec_left)
   );
-
+integer i,j;
   initial begin
     // dump waves
-    $dumpfile("alarmtest.vcd");
-    $dumpvars(0,test);
+    //$dumpfile("datetest.vcd");
+    //$dumpvars(0,test);
 
     // initialize
     clk            = 0;
@@ -40,16 +40,24 @@ module test;
     add_minute     = 0;
     set_timer_btn  = 0;
     set_alarm_btn  = 0;
-    #2 reset = 0;
+    #1 reset = 0;
 
-    //Enter SET_ALARM, bump hr & min, confirm
-    #10 mode_btn = 1; #1 mode_btn = 0;
-    #10 mode_btn = 1; #1 mode_btn = 0;
-    #5 add_hour   = 1; #1 add_hour   = 0;  // +1 hour
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 minute
-    #5 set_alarm_btn = 1; #1 set_alarm_btn = 0;
+    // IDLE
+   for (j = 0; j < 1947+1; j = j + 1) begin //j is number of days we want till april so j= 366*2+365*3+31+28+31+30=1947
+  for (i = 0; i < 23; i = i + 1) begin
+    #1 add_hour = 1; 
+    #1 add_hour = 0;  // +1 hour
+    #1 add_minute = 1; 
+    #1 add_minute = 0;  // +1 minute
+  end
+  for (i = 0; i < 35; i = i + 1) begin
+    #1 add_minute = 1; 
+    #1 add_minute = 0;  // +1 minute
+  end
+  #23;
+  end
+  
 
-    #3686;
 
     $finish;
   end
@@ -61,7 +69,7 @@ module test;
   always @(posedge clk) begin
     $display("MODE=%0d | %02d:%02d:%02d %s | %02d/%02d/%04d | Tleft=%02d:%02d Bz=%b | Albz=%b",
       uut.state,
-      hr, min, sec,AM_mode?(AM_PM ? "PM" : "AM"):"HOURS",
+      hr, min, sec, AM_mode?(AM_PM ? "PM" : "AM"):"HOURS",
       day, month, year,
       timer_min_left, timer_sec_left, timer_buzzer,
       alarm_buzzer

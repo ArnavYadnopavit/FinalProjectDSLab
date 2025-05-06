@@ -64,7 +64,7 @@ module test;
   always @(posedge clk) begin
     $display("MODE=%0d | %02d:%02d:%02d %s | %02d/%02d/%04d | Tleft=%02d:%02d Bz=%b | Albz=%b",
       uut.state,
-      hr, min, sec, AM_PM?"PM":"AM",
+      hr, min, sec, AM_mode?(AM_PM ? "PM" : "AM"):"HOURS",
       day, month, year,
       timer_min_left, timer_sec_left, timer_buzzer,
       alarm_buzzer
