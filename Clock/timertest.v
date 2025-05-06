@@ -25,7 +25,8 @@ module test;
     .timer_min_left(timer_min_left),
     .timer_sec_left(timer_sec_left)
   );
-
+integer i;
+integer timee=5;
   initial begin
     // dump waves
     $dumpfile("timertest.vcd");
@@ -43,16 +44,14 @@ module test;
     #2 reset = 0;
     //Timer
     #5 mode_btn = 1; #1 mode_btn = 0;
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 minute
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 more
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 more
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 more
-    #5 add_minute = 1; #1 add_minute = 0;  // +1 more
+    for(i=0;i<timee;i=i+1)begin
+    #5 add_minute = 1; #1 add_minute = 0;
+    end
     #5 set_timer_btn = 1; #1 set_timer_btn = 0;
 
 
 
-    #302;
+    #(timee*60+2);
 
     $finish;
   end
