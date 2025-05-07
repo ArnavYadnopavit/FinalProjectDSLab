@@ -11,7 +11,7 @@ module test;
   wire [3:0] month;
   wire [11:0] year;
 
-  clock_with_mode_fsm uut(
+  the_clock uut(
     .clk(clk), .reset(reset),
     .mode_btn(mode_btn),
     .add_hour(add_hour), .add_minute(add_minute),

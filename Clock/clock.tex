@@ -9,6 +9,7 @@
  \usepackage{float}
 \usepackage{xcolor}
 \usepackage{url}
+\usepackage{circuitikz}
 \lstset{
   basicstyle=\ttfamily\footnotesize,
   keywordstyle=\color{blue},
@@ -52,7 +53,35 @@ The \texttt{timekeeper} module is the core of the clock system, maintaining curr
   \item \texttt{S\_HR}: Increments hours and handles AM/PM toggling.
   \item \texttt{S\_DATE}: Manages day, month, and year transitions including leap year handling.
 \end{itemize}
-
+\begin{figure}[H]
+\centering
+\resizebox{1\textwidth}{!}{%
+\begin{circuitikz}
+\tikzstyle{every node}=[font=\normalsize]
+\draw  (4.5,13.75) circle (1.25cm);
+\draw  (9,13.75) circle (1.25cm);
+\draw  (13.5,13.75) circle (1.25cm);
+\draw  (18,13.75) circle (1.25cm);
+\draw [->, >=Stealth] (5.75,13.75) -- (7.75,13.75);
+\draw [->, >=Stealth] (10.25,13.75) -- (12.25,13.75);
+\draw [->, >=Stealth] (14.75,13.75) -- (16.75,13.75);
+\node [font=\Large] at (4.5,13.75) {$S\_SEC$};
+\node [font=\Large] at (9,13.75) {$S\_MIN$};
+\node [font=\Large] at (13.5,13.75) {$S\_HR$};
+\node [font=\Large] at (18,13.75) {$S\_DATE$};
+\draw [->, >=Stealth] (5.5,13) .. controls (4.75,8.5) and (3.75,11) .. (3.5,13) ;
+\draw [->, >=Stealth] (8.75,12.5) .. controls (8.75,12.25) and (7,10) .. (5.5,13) ;
+\draw [->, >=Stealth] (13.25,12.5) .. controls (11.25,12) and (6.75,8.5) .. (5.5,13) ;
+\draw [->, >=Stealth] (17.75,12.5) -- (5.5,13);
+\node [font=\normalsize] at (6.75,14) {sec==6d'59};
+\node [font=\normalsize] at (11.25,14) {min==6d'59};
+\node [font=\normalsize] at (16.25,15) {Date change satisied};
+\node [font=\normalsize] at (4.5,10.25) {sec!=59};
+\node [font=\normalsize] at (7.25,12) {min!=59};
+\node [font=\normalsize] at (9.75,11.5) {else};
+\end{circuitikz}
+}%
+\end{figure}
 \subsection{AM/PM Mode}
 The module supports both 12-hour and 24-hour formats using the \texttt{AM\_mode} signal. Transitions between formats are dynamically handled by converting the hour and setting the AM/PM bit accordingly.
 
@@ -85,13 +114,33 @@ The \texttt{alarm\_module} allows users to set a daily alarm:
 The \texttt{digital\_clock} module integrates the timekeeper, timer, and alarm modules. It connects the outputs of the timekeeper to the alarm, and takes mode-specific control inputs for the timer and alarm settings.
 
 \section{Top-Level FSM: Mode Management}
-The \texttt{clock\_with\_mode\_fsm} module manages high-level user interaction through a 3-state FSM:
+The \texttt{the\_clock} module manages high-level user interaction through a 3-state FSM:
 \begin{itemize}
   \item \texttt{IDLE}: Regular clock mode; manual time setting is allowed.
   \item \texttt{SET\_TIMER}: Timer configuration; minute increments adjust the timer duration.
   \item \texttt{SET\_ALARM}: Alarm configuration; hours and minutes set the alarm time.
 \end{itemize}
+\begin{figure}[H]
+\centering
+\resizebox{1\textwidth}{!}{%
+\begin{circuitikz}
+\tikzstyle{every node}=[font=\normalsize]
+\draw  (7.5,14) circle (1.25cm);
+\draw  (11.75,14) circle (1.25cm);
+\draw  (9.5,10.5) circle (1.25cm);
+\draw [->, >=Stealth] (8.75,14) -- (10.5,14);
+\draw [->, >=Stealth] (11.5,12.75) -- (10.5,11.25);
+\draw [->, >=Stealth] (8.5,11.25) -- (7.75,12.75);
+\node [font=\Large] at (7.25,14) {IDLE};
+\node [font=\large] at (11.75,14) {SET\_TIMER};
+\node [font=\large] at (9.5,10.5) {SET\_ALARM};
+\node [font=\normalsize] at (9.5,14.25) {Next};
+\node [font=\normalsize] at (11.25,12) {Next};
+\node [font=\normalsize] at (8.25,12.25) {Next};
+\end{circuitikz}
+}%
 
+\end{figure}
 Transitions between states are triggered by a mode button. Each mode enables appropriate functionality while isolating input changes to relevant subsystems.
 \section{Timing Diagrams}
 \subsection{Alarm}

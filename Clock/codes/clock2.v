@@ -1,81 +1,78 @@
 `timescale 1s / 1ms
 
 module timekeeper(
-    input             clk,
-    input             reset,
-    input             AM_mode,
-    input             add_hour,
-    input             add_minute,
-    output reg [5:0]  sec,
-    output reg [5:0]  min,
-    output reg [5:0]  hr,
-    output reg        AM_PM,
-    output reg [4:0]  day,
-    output reg [3:0]  month,
+    input clk,
+    input reset,
+    input AM_mode,
+    input add_hour,
+    input add_minute,
+    output reg [5:0] sec,
+    output reg [5:0] min,
+    output reg [5:0] hr,
+    output reg AM_PM,
+    output reg [4:0] day,
+    output reg [3:0] month,
     output reg [11:0] year
 );
 
   // State encoding
-  localparam S_SEC  = 2'd0,
-             S_MIN  = 2'd1,
-             S_HR   = 2'd2,
-             S_DATE = 2'd3;
+  localparam S_SEC=2'd0,
+             S_MIN=2'd1,
+             S_HR=2'd2,
+             S_DATE=2'd3;
 
   // State registers
-  reg [1:0] state, next_state;
+  reg [1:0] state,next_state;
 
   // Next value registers
-  reg [5:0] sec_next, min_next, hr_next;
-  reg       AM_PM_next;
+  reg [5:0] sec_next,min_next, hr_next;
+  reg AM_PM_next;
   reg [4:0] day_next;
   reg [3:0] month_next;
   reg [11:0] year_next;
   reg [5:0] days_in_month;
-
-  // Track AM_mode changes
   reg AM_mode_prev;
 
   // Sequential logic
   always @(posedge clk or posedge reset) begin
     if (reset) begin
-      state        <= S_SEC;
-      sec          <= 0;
-      min          <= 0;
-      hr           <= 12;
-      AM_PM        <= 0;
-      day          <= 1;
-      month        <= 1;
-      year         <= 2020;
+      state <= S_SEC;
+      sec <= 0;
+      min <= 0;
+      hr  <= 12;
+      AM_PM <= 0;
+      day <= 1;
+      month <= 1;
+      year <= 2020;
       AM_mode_prev <= AM_mode;
     end else begin
-      state        <= next_state;
-      sec          <= sec_next;
-      min          <= min_next;
-      hr           <= hr_next;
-      AM_PM        <= AM_PM_next;
-      day          <= day_next;
-      month        <= month_next;
-      year         <= year_next;
-      AM_mode_prev <= AM_mode; // Track previous AM_mode
+      state <= next_state;
+      sec <= sec_next;
+      min <= min_next;
+      hr <= hr_next;
+      AM_PM <= AM_PM_next;
+      day <= day_next;
+      month <= month_next;
+      year <= year_next;
+      AM_mode_prev <= AM_mode;
     end
   end
 
-  // Combinational logic
+  //Combinational logic
   always @(*) begin
-    // Default holds
-    next_state   = state;
-    sec_next     = sec;
-    min_next     = min;
-    hr_next      = hr;
-    AM_PM_next   = AM_PM;
-    day_next     = day;
-    month_next   = month;
-    year_next    = year;
+    next_state = state;
+    sec_next = sec;
+    min_next = min;
+    hr_next = hr;
+    AM_PM_next = AM_PM;
+    day_next = day;
+    month_next = month;
+    year_next = year;
 
-    // Handle mode change (24h <-> 12h)
+    //mode change
     if (AM_mode != AM_mode_prev) begin
       if (AM_mode) begin
-        // 24h -> 12h
+        // 24h to 12h
         if (hr == 0) begin
           hr_next = 12;
           AM_PM_next = 0;
@@ -90,7 +87,7 @@ module timekeeper(
           AM_PM_next = 0;
         end
       end else begin
-        // 12h -> 24h
+        // 12h to 24h
         if (hr == 12 && AM_PM == 0)
           hr_next = 0;
         else if (hr == 12 && AM_PM == 1)
@@ -106,20 +103,20 @@ module timekeeper(
     case (state)
       S_SEC: begin
         if (sec == 6'd59) begin
-          sec_next   = 0;
+          sec_next = 0;
           next_state = S_MIN;
         end else begin
-          sec_next   = sec + 1;
+          sec_next = sec + 1;
           next_state = S_SEC;
         end
       end
 
       S_MIN: begin
         if (min == 6'd59) begin
-          min_next   = 0;
+          min_next = 0;
           next_state = S_HR;
         end else begin
-          min_next   = min + 1;
+          min_next = min + 1;
           next_state = S_SEC;
         end
       end
@@ -127,7 +124,7 @@ module timekeeper(
       S_HR: begin
         if (AM_mode) begin
           if (hr == 6'd11) begin
-            hr_next    = 12;
+            hr_next= 12;
             AM_PM_next = ~AM_PM;
           end else if (hr == 6'd12) begin
             hr_next = 1;
@@ -144,10 +141,7 @@ module timekeeper(
       end
 
       S_DATE: begin
-        if ((AM_mode && hr_next == 12 && AM_PM_next == 0) ||
-            (!AM_mode && hr_next == 0)) begin
-
-          // Get correct days in current month
+        if ((AM_mode && hr_next == 12 && AM_PM_next == 0) ||(!AM_mode && hr_next == 0)) begin
           case (month)
             1, 3, 5, 7, 8, 10, 12: days_in_month = 31;
             4, 6, 9, 11:           days_in_month = 30;
@@ -159,7 +153,6 @@ module timekeeper(
             end
             default: days_in_month = 31;
           endcase
-
           if (day == 5'd30 && month == 4'd4 && year == 12'd2025) begin
             day_next   = 1;
             month_next = 1;
@@ -182,13 +175,13 @@ module timekeeper(
       end
     endcase
 
-    // Manual add minute
+    // Manually add minute
     if (add_minute) begin
       if (min == 6'd59) begin
         min_next = 0;
         if (AM_mode) begin
           if (hr == 6'd11) begin
-            hr_next    = 12;
+            hr_next = 12;
             AM_PM_next = ~AM_PM;
           end else if (hr == 6'd12) begin
             hr_next = 1;
@@ -206,11 +199,11 @@ module timekeeper(
       end
     end
 
-    // Manual add hour
+    // Manually add hour
     if (add_hour) begin
       if (AM_mode) begin
         if (hr == 6'd11) begin
-          hr_next    = 12;
+          hr_next = 12;
           AM_PM_next = ~AM_PM;
         end else if (hr == 6'd12) begin
           hr_next = 1;
@@ -230,13 +223,13 @@ endmodule
 
 
 module timer_module(
-    input         clk,
-    input         reset,
-    input         set_timer,
-    input  [3:0]  timer_minutes,
-    output reg    timer_buzzer,
-    output [5:0]  timer_min_left,
-    output [5:0]  timer_sec_left
+    input clk,
+    input reset,
+    input set_timer,
+    input  [3:0] timer_minutes,
+    output reg timer_buzzer,
+    output [5:0] timer_min_left,
+    output [5:0] timer_sec_left
 );
   reg [9:0] timer_sec_total;
   assign timer_min_left = timer_sec_total / 60;
@@ -245,15 +238,15 @@ module timer_module(
   always @(posedge clk or posedge reset) begin
     if (reset) begin
       timer_sec_total <= 0;
-      timer_buzzer    <= 0;
+      timer_buzzer <= 0;
     end else begin
       if (set_timer && timer_sec_total == 0)
         timer_sec_total <= timer_minutes * 60;
       else if (timer_sec_total > 0) begin
         timer_sec_total <= timer_sec_total - 1;
-        timer_buzzer    <= (timer_sec_total == 1);
+        timer_buzzer <= (timer_sec_total == 1);
       end else
-        timer_buzzer    <= 0;
+        timer_buzzer <= 0;
     end
   end
 endmodule
@@ -261,15 +254,15 @@ endmodule
 
 
 module alarm_module(
-    input         clk,
-    input         reset,
-    input         set_alarm,
-    input  [5:0]  alarm_hr,
-    input  [5:0]  alarm_min,
-    input  [5:0]  curr_hr,
-    input  [5:0]  curr_min,
-    input  [5:0]  curr_sec,
-    output reg    alarm_buzzer
+    input clk,
+    input reset,
+    input set_alarm,
+    input [5:0] alarm_hr,
+    input [5:0] alarm_min,
+    input [5:0] curr_hr,
+    input [5:0] curr_min,
+    input [5:0] curr_sec,
+    output reg alarm_buzzer
 );
   reg [5:0] alarm_hr_reg, alarm_min_reg;
 
@@ -292,30 +285,30 @@ endmodule
 
 
 module digital_clock(
-    input         clk,
-    input         reset,
-    input         AM_mode,
-    input         set_timer,
-    input  [3:0]  timer_minutes,
-    input         add_hour,
-    input         add_minute,
-    input         set_alarm,
-    input  [5:0]  alarm_hr,
-    input  [5:0]  alarm_min,
-    output [5:0]  sec,
-    output [5:0]  min,
-    output [5:0]  hr,
-    output        AM_PM,
-    output [4:0]  day,
-    output [3:0]  month,
+    input clk,
+    input reset,
+    input AM_mode,
+    input set_timer,
+    input [3:0] timer_minutes,
+    input add_hour,
+    input add_minute,
+    input set_alarm,
+    input [5:0] alarm_hr,
+    input [5:0] alarm_min,
+    output [5:0] sec,
+    output [5:0] min,
+    output [5:0] hr,
+    output AM_PM,
+    output [4:0] day,
+    output [3:0] month,
     output [11:0] year,
-    output        timer_buzzer,
-    output        alarm_buzzer,
-    output [5:0]  timer_min_left,
-    output [5:0]  timer_sec_left
+    output timer_buzzer,
+    output alarm_buzzer,
+    output [5:0] timer_min_left,
+    output [5:0] timer_sec_left
 );
-  timekeeper   tk(clk, reset, AM_mode, add_hour, add_minute,
-                  sec, min, hr, AM_PM, day, month, year);
+  timekeeper tk(clk, reset, AM_mode, add_hour, add_minute,
+                sec, min, hr, AM_PM, day, month, year);
 
   timer_module tm(clk, reset, set_timer, timer_minutes,
                   timer_buzzer, timer_min_left, timer_sec_left);
@@ -328,7 +321,7 @@ endmodule
 
 
 
-module clock_with_mode_fsm(
+module the_clock(
     input        clk,
     input        reset,
     input        mode_btn,
@@ -379,7 +372,7 @@ module clock_with_mode_fsm(
   // Adjust timer_minutes in SET_TIMER
   reg [3:0] timer_minutes;
   always @(posedge clk or posedge reset) begin
-    if (reset)                              timer_minutes <= 4'd0;
+    if (reset) timer_minutes <= 4'd0;
     else if (timer_mode_active && add_minute) timer_minutes <= timer_minutes + 1;
     else if (timer_mode_active && add_hour)   timer_minutes <= timer_minutes + 4;
   end
