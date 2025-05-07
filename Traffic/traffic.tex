@@ -2,6 +2,7 @@
 \usepackage{graphicx}
 \usepackage{circuitikz}
 \usepackage{float}
+\usepackage{url}
 
 \title{T-Junction Traffic Controller Design}
 \author{Arnav Yadnopavit EE24BTECH11007\\Prajwal EE24BTECH11051\\Shivam Shilvant EE24BTECH11057}
@@ -23,22 +24,30 @@ Design of an intelligent traffic control system for T-junctions with:
 \section{Design Architecture}
 
 \subsection{State Machines}
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
-\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2.5cm]
-    \node[state] (R) {Red};
-    \node[state] (G) [right of=R] {Green};
-    \node[state] (GT) [right of=G] {Green+Turn};
-    \node[state] (O) [below of=GT] {Orange};
-    \node[state] (Y) [left of=O] {Yellow};
-    
-    \path (R) edge node {Timer=0} (G)
-          (G) edge node {Timer=0} (GT)
-          (GT) edge node {Timer=0} (O)
-          (O) edge node {Timer=0} (Y)
-          (Y) edge node {Timer=0} (R);
-\end{tikzpicture}
-\caption{State machine diagram for each traffic direction}
+\resizebox{1\textwidth}{!}{%
+\begin{circuitikz}
+\tikzstyle{every node}=[font=\normalsize]
+\node [font=\large] at (3.25,12) {Red};
+\draw [->, >=Stealth] (3.75,12) -- (6.5,12);
+\node [font=\large] at (7.25,12) {Green};
+\draw [->, >=Stealth] (8,12) -- (10.75,12);
+\node [font=\large] at (11.75,12) {Yellow};
+\node [font=\large] at (13,12) {+Turn};
+\draw [->, >=Stealth] (12.25,11.5) -- (12.25,8.75);
+\node [font=\large] at (12.25,8.25) {Orange};
+\draw [->, >=Stealth] (11.25,8.25) -- (8,8.25);
+\node [font=\large] at (7,8.25) {Yellow};
+\draw [->, >=Stealth] (6.25,8.25) -- (3.25,11.5);
+\node [font=\normalsize] at (5.25,12.5) {Timer=0};
+\node [font=\normalsize] at (9.25,12.5) {Timer=0};
+\node [font=\normalsize] at (11,10.25) {Timer=0};
+\node [font=\normalsize] at (9.75,8) {Timer=0};
+\node [font=\normalsize] at (3.5,9.75) {Timer=0};
+\end{circuitikz}
+}%
+\label{fig:my_label}
 \end{figure}
 
 \subsection{Key Features}
@@ -107,5 +116,8 @@ The design meets all requirements while ensuring:
     \item Clear turn signal indication
     \item Predictable timing behavior
 \end{itemize}
+For codes refer to \url{https://github.com/ArnavYadnopavit/FinalProjectDSLab}\\
 
+\centering
+Thank You
 \end{document}
